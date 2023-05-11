@@ -3,13 +3,13 @@ namespace DotNetDelta {
     /// <summary>
     /// A map of attributes. Defines static methods to manipulate attribute maps.
     /// </summary>
-    class AttributeMap : Dictionary<string, object> {
+    public class AttributeMap : Dictionary<string, object> {
 
 
         /// <summary>
         /// Composes two attribute maps into a new attribute map. Composition is just merging the two maps.
         /// </summary>
-        public static AttributeMap compose(AttributeMap a, AttributeMap b, bool keepNull = false) {
+        public static AttributeMap Compose(AttributeMap a, AttributeMap b, bool keepNull = false) {
             if (a == null)
             {
                 a = new AttributeMap();
@@ -19,19 +19,20 @@ namespace DotNetDelta {
                 b = new AttributeMap();
             }
             AttributeMap c = new AttributeMap();
-            foreach (KeyValuePair<string, object> kvp in a) {
-                if (keepNull || kvp.Value != null) 
-                {
-                    c[kvp.Key] = kvp.Value;
-                }
-                
-            }
             foreach (KeyValuePair<string, object> kvp in b) {
                 if (keepNull || kvp.Value != null)
                 {
                     c[kvp.Key] = kvp.Value;
                 }
             }
+            foreach (KeyValuePair<string, object> kvp in a) {
+                if (!b.ContainsKey(kvp.Key)) 
+                {
+                    c[kvp.Key] = kvp.Value;
+                }
+                
+            }
+
             return c;
         }
 
@@ -39,7 +40,7 @@ namespace DotNetDelta {
         /// <summary>
         /// Returns the difference between two attribute maps (b - a). The difference is an AttributeMap with entries that are in b but not in a.
         /// </summary>
-        public static AttributeMap diff(AttributeMap a, AttributeMap b)
+        public static AttributeMap Diff(AttributeMap a, AttributeMap b)
         {
             if (a == null)
             {
@@ -83,7 +84,7 @@ namespace DotNetDelta {
         /// Returns another AttributeMap that would "undo" the changes that the composition of "attributes" and "base" would make to "base".
         /// That is: invert(compose(base, attributes), attributes) == base
         /// </summary>
-        public static AttributeMap invert(AttributeMap modifingAttributes, AttributeMap baseAttributes)
+        public static AttributeMap Invert(AttributeMap modifingAttributes, AttributeMap baseAttributes)
         {
             if (modifingAttributes == null)
             {
@@ -120,7 +121,7 @@ namespace DotNetDelta {
         /// <summary>
         /// Returns a new AttributeMap that is the transformation of left when right is superposed.
         /// </summary>
-        public static AttributeMap transform(AttributeMap left, AttributeMap right, bool priority = false)
+        public static AttributeMap Transform(AttributeMap left, AttributeMap right, bool priority = false)
         {
             if (left == null)
             {
