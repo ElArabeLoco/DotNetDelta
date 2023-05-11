@@ -1,0 +1,12 @@
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/obj/Debug/net7.0/Delta.csproj.AssemblyReference.cache
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/obj/Debug/net7.0/Delta.GeneratedMSBuildEditorConfig.editorconfig
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/obj/Debug/net7.0/Delta.AssemblyInfoInputs.cache
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/obj/Debug/net7.0/Delta.AssemblyInfo.cs
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/obj/Debug/net7.0/Delta.csproj.CoreCompileInputs.cache
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/bin/Debug/net7.0/Delta.deps.json
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/bin/Debug/net7.0/Delta.dll
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/bin/Debug/net7.0/Delta.pdb
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/obj/Debug/net7.0/Delta.dll
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/obj/Debug/net7.0/refint/Delta.dll
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/obj/Debug/net7.0/Delta.pdb
+/Users/jaimegarcia/dev/lab/deltacsharp/Delta/obj/Debug/net7.0/ref/Delta.dll

@@ -1,0 +1,6 @@
+namespace DotNetDelta {
+
+    class OpIterator {
+        
+    }
+}
