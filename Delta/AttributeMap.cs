@@ -5,6 +5,7 @@ namespace DotNetDelta {
     /// </summary>
     public class AttributeMap : Dictionary<string, object> 
     {
+        private static IEqualityComparer<object> comparer = EqualityComparer<object>.Default;
 
 
         /// <summary>
@@ -60,14 +61,15 @@ namespace DotNetDelta {
             // If the values are different, add the key and value to the new map
             // If the values are the same, do nothing
             
-            IEnumerable<string> allKeys = a.Keys.Union(b.Keys);            
+            IEnumerable<string> allKeys = a.Keys.Union(b.Keys);
 
             foreach (string key in allKeys)
             {
                 // Case 1, both maps have the key. If their values are equal, they cancel each other out; otherwise, we pick the attribute value in b
                 if (a.ContainsKey(key) && b.ContainsKey(key))
                 {
-                    if (!a[key].Equals(b[key]))
+                    
+                    if (!comparer.Equals(a[key], b[key]))
                     {
                         diff[key] = b[key];
                     }
@@ -104,10 +106,9 @@ namespace DotNetDelta {
             AttributeMap inversion = new AttributeMap();
         
             
-            string[] allKeys = new string[modifingAttributes.Count + baseAttributes.Count];
-            modifingAttributes.Keys.CopyTo(allKeys, 0);
-            modifingAttributes.Keys.CopyTo(allKeys, modifingAttributes.Count);
-            // If key is defined in both maps, take the value in base
+            IEnumerable<string> allKeys = modifingAttributes.Keys.Union(baseAttributes.Keys);
+
+            // If key is defined in both maps, take the value in base if they're different; otherwise, don't add anything
             // If key is defined in modifingAttributes, but not in base, use null
             // If key is defined in base, but not in modifingAttributes, don't add anything
             // If key is defined in neither, don't add anything
@@ -115,7 +116,10 @@ namespace DotNetDelta {
             {
                 if (modifingAttributes.ContainsKey(key) && baseAttributes.ContainsKey(key))
                 {
-                    inversion[key] = baseAttributes[key];
+                    if (!comparer.Equals(modifingAttributes[key], baseAttributes[key]))
+                    {
+                        inversion[key] = baseAttributes[key];
+                    }
                 }
                 else if (modifingAttributes.ContainsKey(key) && !baseAttributes.ContainsKey(key))
                 {
@@ -142,10 +146,8 @@ namespace DotNetDelta {
             {
                 return right;
             }
-            string[] allKeys = new string[left.Count + right.Count];
-            left.Keys.CopyTo(allKeys, 0);
-            right.Keys.CopyTo(allKeys, left.Count);
 
+            IEnumerable<string> allKeys = left.Keys.Union(right.Keys);
             AttributeMap transformation = new AttributeMap();
             foreach (string key in allKeys)
             {

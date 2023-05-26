@@ -179,6 +179,120 @@ namespace DotNetDelta.Tests
             Assert.AreEqual(expected, AttributeMap.Diff(format, overwriting));
         }
 
+        //--------------------------------------------------------------------------------
+        // Invert Tests
+        //--------------------------------------------------------------------------------
+
+        [Test]
+        public void Test_Invert_WhenArgumentIsNull()
+        {
+            AttributeMap baseAttributes = new AttributeMap();
+            baseAttributes["bold"] = true;
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Invert(null, baseAttributes));
+        }
+
+
+        [Test]
+        public void Test_Invert_WhenBaseIsNull()
+        {
+            AttributeMap appliedAttributes = new AttributeMap();
+            appliedAttributes["bold"] = true;
+            appliedAttributes["color"] = "red";
+
+            AttributeMap expected = new AttributeMap();
+            expected["bold"] = null;
+            expected["color"] = null;
+
+            Assert.AreEqual(expected, AttributeMap.Invert(appliedAttributes, null));
+        }
+
+        [Test]
+        public void Test_Invert_WhenBothArgumentsAreNull()
+        {
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Invert(null, null));
+        }
+
+        [Test]
+        public void Test_Invert_WhenBaseWasModifiedByAnotherAttributeMapAddingAttributes()
+        {
+            AttributeMap baseAttributes = new AttributeMap();
+            baseAttributes["italic"] = true;
+
+            AttributeMap appliedAttributes = new AttributeMap();
+            appliedAttributes["bold"] = true;
+
+            AttributeMap expected = new AttributeMap();
+            expected["bold"] = null;
+
+            Assert.AreEqual(expected, AttributeMap.Invert(appliedAttributes, baseAttributes));
+        }
+
+
+        [Test]
+        public void Test_Invert_WhenBaseWasModifiedByAnotherAttributeMapThatNullifiesAttribute()
+        {
+            AttributeMap baseAttributes = new AttributeMap();
+            baseAttributes["bold"] = true;
+
+            AttributeMap appliedAttributes = new AttributeMap();
+            appliedAttributes["bold"] = null;
+
+            AttributeMap expected = new AttributeMap();
+            expected["bold"] = true;
+
+            Assert.AreEqual(expected, AttributeMap.Invert(appliedAttributes, baseAttributes));
+        }
+
+        [Test]
+        public void Test_Invert_WhenBaseWasModifiedByAnotherAttributeMapReplacingAttributes()
+        {
+            AttributeMap baseAttributes = new AttributeMap();
+            baseAttributes["color"] = "blue";
+
+            AttributeMap appliedAttributes = new AttributeMap();
+            appliedAttributes["color"] =  "red";
+
+            AttributeMap expected = baseAttributes;
+
+            Assert.AreEqual(expected, AttributeMap.Invert(appliedAttributes, baseAttributes));
+        }
+
+        [Test]
+        public void Test_Invert_WhenANotModifyingAttributeApplied()
+        {
+            AttributeMap baseAttributes = new AttributeMap();
+            baseAttributes["color"] = "blue";
+
+            AttributeMap appliedAttributes = new AttributeMap();
+            appliedAttributes["color"] =  "blue";
+
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Invert(appliedAttributes, baseAttributes));
+        }
+
+        [Test]
+        public void Test_Invert_WhenBaseWasModifiedByAnotherAttributeMapAddingAndRemovingAttributes()
+        {
+            AttributeMap baseAttributes = new AttributeMap();
+            baseAttributes["font"] = "serif";
+            baseAttributes["italic"] = true;
+            baseAttributes["color"] = "blue";
+            baseAttributes["size"] = "12px";
+
+            AttributeMap appliedAttributes = new AttributeMap();
+            appliedAttributes["bold"] = true; // add
+            appliedAttributes["italic"] = null; // remove
+            appliedAttributes["color"] = "red"; // replace
+            appliedAttributes["size"] = "12px"; // not modified
+
+            AttributeMap expected = new AttributeMap();
+            expected["bold"] = null; 
+            expected["italic"] = true;
+            expected["color"] = "blue";
+
+            Assert.AreEqual(expected, AttributeMap.Invert(appliedAttributes, baseAttributes));
+        }
+        
+
     }
 }
 
