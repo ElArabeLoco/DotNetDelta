@@ -3,6 +3,9 @@ namespace DotNetDelta.Tests
     [TestFixture]
     public class AttributeMap_Tests
     {
+        //--------------------------------------------------------------------------------
+        // Compose Tests
+        //--------------------------------------------------------------------------------
         [Test]
         public void Test_Compose_WhenArgumentsAreNull()
         {
@@ -75,6 +78,107 @@ namespace DotNetDelta.Tests
             
             Assert.AreEqual(expected, AttributeMap.Compose(first, second));
         }
+
+        //--------------------------------------------------------------------------------
+        // Diff Tests
+        //--------------------------------------------------------------------------------
+
+
+
+        [Test]
+        public void Test_Diff_WhenLeftIsNull()
+        {
+            AttributeMap format = new AttributeMap();
+            format["bold"] = true;
+            format["color"] = "red";
+            
+            Assert.AreEqual(format, AttributeMap.Diff(null, format));
+        }
+
+        [Test]
+        public void Test_Diff_WhenRightIsNull()
+        {
+            AttributeMap format = new AttributeMap();
+            format["bold"] = true;
+            format["color"] = "red";
+
+            AttributeMap expected = new AttributeMap();
+            expected["bold"] = null;
+            expected["color"] = null;
+            
+            Assert.AreEqual(expected, AttributeMap.Diff(format, null));
+        }
+
+
+        [Test]
+        public void Test_Diff_WhenBothArgumentsAreNull()
+        {
+           
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Diff(null, null));
+        }
+
+
+        [Test]
+        public void Test_Diff_WhenBothArgumentsAreSame()
+        {
+            AttributeMap format = new AttributeMap();
+            format["bold"] = true;
+            format["color"] = "red";
+           
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Diff(format, format));
+        }
+
+        [Test]
+        public void Test_Diff_WhenAddingFormat()
+        {
+            AttributeMap format = new AttributeMap();
+            format["bold"] = true;
+            format["color"] = "red";
+
+            AttributeMap added = new AttributeMap();
+            added["bold"] = true;
+            added["italic"] = true;
+            added["color"] = "red";
+
+            AttributeMap expected = new AttributeMap();
+            expected["italic"] = true;
+           
+            Assert.AreEqual(expected, AttributeMap.Diff(format, added));
+        }
+
+        [Test]
+        public void Test_Diff_WhenRemovingFormat()
+        {
+            AttributeMap format = new AttributeMap();
+            format["bold"] = true;
+            format["color"] = "red";
+
+            AttributeMap removing = new AttributeMap();
+            removing["bold"] = true;
+
+            AttributeMap expected = new AttributeMap(); 
+            expected["color"] = null;
+           
+            Assert.AreEqual(expected, AttributeMap.Diff(format, removing));
+        }
+
+        [Test]
+        public void Test_Diff_WhenOverwritingFormat()
+        {
+            AttributeMap format = new AttributeMap();
+            format["bold"] = true;
+            format["color"] = "red";
+
+            AttributeMap overwriting = new AttributeMap();
+            overwriting["bold"] = true;
+            overwriting["color"] = "blue";
+
+            AttributeMap expected = new AttributeMap();
+            expected["color"] = "blue";
+           
+            Assert.AreEqual(expected, AttributeMap.Diff(format, overwriting));
+        }
+
     }
 }
 

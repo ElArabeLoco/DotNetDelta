@@ -3,13 +3,15 @@ namespace DotNetDelta {
     /// <summary>
     /// A map of attributes. Defines static methods to manipulate attribute maps.
     /// </summary>
-    public class AttributeMap : Dictionary<string, object> {
+    public class AttributeMap : Dictionary<string, object> 
+    {
 
 
         /// <summary>
         /// Composes two attribute maps into a new attribute map. Composition is just merging the two maps.
         /// </summary>
-        public static AttributeMap Compose(AttributeMap a, AttributeMap b, bool keepNull = false) {
+        public static AttributeMap Compose(AttributeMap a, AttributeMap b, bool keepNull = false) 
+        {
             if (a == null)
             {
                 a = new AttributeMap();
@@ -19,13 +21,15 @@ namespace DotNetDelta {
                 b = new AttributeMap();
             }
             AttributeMap c = new AttributeMap();
-            foreach (KeyValuePair<string, object> kvp in b) {
+            foreach (KeyValuePair<string, object> kvp in b) 
+            {
                 if (keepNull || kvp.Value != null)
                 {
                     c[kvp.Key] = kvp.Value;
                 }
             }
-            foreach (KeyValuePair<string, object> kvp in a) {
+            foreach (KeyValuePair<string, object> kvp in a) 
+            {
                 if (!b.ContainsKey(kvp.Key)) 
                 {
                     c[kvp.Key] = kvp.Value;
@@ -38,7 +42,7 @@ namespace DotNetDelta {
 
 
         /// <summary>
-        /// Returns the difference between two attribute maps (b - a). The difference is an AttributeMap with entries that are in b but not in a.
+        /// Returns the difference between two attribute maps. The difference is an AttributeMap with entries that are in b but not in a.
         /// </summary>
         public static AttributeMap Diff(AttributeMap a, AttributeMap b)
         {
@@ -56,14 +60,11 @@ namespace DotNetDelta {
             // If the values are different, add the key and value to the new map
             // If the values are the same, do nothing
             
-            string[] allKeys = new string[a.Count + b.Count];
-            a.Keys.CopyTo(allKeys, 0);
-            b.Keys.CopyTo(allKeys, a.Count);
+            IEnumerable<string> allKeys = a.Keys.Union(b.Keys);            
 
             foreach (string key in allKeys)
             {
-                // Case 1, both maps has the key, and their values are the equals. They cancel each other out.
-                // Case 2, key is present in a, but not in b. Add it to the diff map.
+                // Case 1, both maps have the key. If their values are equal, they cancel each other out; otherwise, we pick the attribute value in b
                 if (a.ContainsKey(key) && b.ContainsKey(key))
                 {
                     if (!a[key].Equals(b[key]))
@@ -71,9 +72,15 @@ namespace DotNetDelta {
                         diff[key] = b[key];
                     }
                 }
+                // Case 2, key is present in b, but not in a. Add it to the diff map.
                 else if (!a.ContainsKey(key) && b.ContainsKey(key))
                 {
                     diff[key] = b[key];
+                }
+                // Case 3, key was present a, but not in b. Add it to the diff map with a null value.
+                else if (a.ContainsKey(key) && !b.ContainsKey(key))
+                {
+                    diff[key] = null;
                 }
             }
 
