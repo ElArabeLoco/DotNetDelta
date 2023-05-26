@@ -130,30 +130,38 @@ namespace DotNetDelta {
         }
 
         /// <summary>
-        /// Returns a new AttributeMap that is the transformation of left when right is superposed.
+        /// Returns a new AttributeMap that is the transformation of left when right is superposed. 
+        /// Priority determines whether the transformation only applies to attributes that are not defined in left. If true, 
+        /// only new attributes are added to the resulting transformation; otherwise, the transformation is just right.
         /// </summary>
-        public static AttributeMap Transform(AttributeMap left, AttributeMap right, bool priority = false)
+        public static AttributeMap? Transform(AttributeMap left, AttributeMap right, bool priority = false)
         {
             if (left == null)
             {
-                left = new AttributeMap();
+                return right == null ? new AttributeMap() : right;
             }
             if (right == null)
             {
-                right = new AttributeMap();
+                return new AttributeMap();
             }
             if (!priority)
             {
+                // Right argument just overwrites the left argument in case both are defined
                 return right;
             }
 
-            IEnumerable<string> allKeys = left.Keys.Union(right.Keys);
+            // IEnumerable<string> allKeys = left.Keys.Union(right.Keys);
             AttributeMap transformation = new AttributeMap();
-            foreach (string key in allKeys)
-            {
-                if (!left.ContainsKey(key))
-                {
-                    transformation[key] = right[key];
+            // foreach (string key in allKeys)
+            // {
+            //     if (!left.ContainsKey(key))
+            //     {
+            //         transformation[key] = right[key];
+            //     }
+            // }
+            foreach (KeyValuePair<string, object> kvp in right) {
+                if (!left.ContainsKey(kvp.Key)) {
+                    transformation[kvp.Key] = kvp.Value;
                 }
             }
             return transformation;

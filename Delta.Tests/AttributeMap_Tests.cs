@@ -293,6 +293,73 @@ namespace DotNetDelta.Tests
         }
         
 
+        //--------------------------------------------------------------------------------
+        // Transform Tests
+        //--------------------------------------------------------------------------------
+
+        [Test]
+        public void Test_Transform_WhenLeftIsNull()
+        {
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null));
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null, true));
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, new AttributeMap()));
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, new AttributeMap(), true));
+        }
+
+        [Test]
+        public void Test_Transform_WhenRightIsNull()
+        {
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null));
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null, true));
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(new AttributeMap(), null));
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(new AttributeMap(), null, true));
+        }
+
+        [Test]
+        public void Test_Transform_WhenBothAreNull()
+        {
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null));
+            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null, true));
+        }
+
+        [Test]
+        public void Test_Transform_WithPriority()
+        {
+            AttributeMap left = new AttributeMap();
+            left["bold"] = true;
+            left["color"] = "red";
+            left["font"] = null;
+
+            AttributeMap right = new AttributeMap();
+            right["color"] = "blue";
+            right["font"] = "serif";
+            right["italic"] = true;
+
+            AttributeMap expected = new AttributeMap();
+            expected["italic"] = true;
+
+            Assert.AreEqual(expected, AttributeMap.Transform(left, right, true));
+        }
+
+        [Test]
+        public void Test_Transform_WithoutPriority()
+        {
+            AttributeMap left = new AttributeMap();
+            left["bold"] = true;
+            left["color"] = "red";
+            left["font"] = null;
+
+            AttributeMap right = new AttributeMap();
+            right["color"] = "blue";
+            right["font"] = "serif";
+            right["italic"] = true;
+
+            AttributeMap expected = right;
+
+            Assert.AreEqual(expected, AttributeMap.Transform(left, right, false));
+        }
+
+
     }
 }
 
