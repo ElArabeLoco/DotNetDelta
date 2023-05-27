@@ -7,6 +7,40 @@ namespace DotNetDelta {
     {
         private static IEqualityComparer<object> comparer = EqualityComparer<object>.Default;
 
+        public AttributeMap() : base() { }
+
+        public AttributeMap(AttributeMap map) : base(map) { 
+            
+        }
+
+        public override string ToString()
+        {
+            return "{" + string.Join(", ", this.Select(kvp => kvp.Key + ": " + kvp.Value)) + "}";
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+                
+            AttributeMap other = (AttributeMap)obj;
+            if (this.Count != other.Count)
+            {
+                return false;
+            }
+            foreach (KeyValuePair<string, object> kvp in this)
+            {
+                if (!other.ContainsKey(kvp.Key) || !comparer.Equals(kvp.Value, other[kvp.Key]))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
 
         /// <summary>
         /// Composes two attribute maps into a new attribute map. Composition is just merging the two maps.
