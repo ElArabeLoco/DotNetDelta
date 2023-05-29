@@ -49,10 +49,13 @@ namespace DotNetDelta
                 
 
             Op other = (Op)obj;
-            if (this.isInsert() && other.isInsert() ||
-            this.isInsertEmbed() && other.isInsertEmbed())
+            if (this.isInsert() && other.isInsert())
             {
                 return comparer.Equals(this.insert, other.insert) && dictComparer.Equals(this.attributes, other.attributes);
+            }
+            if (this.isInsertEmbed() && other.isInsertEmbed())
+            {
+                return embedsAreEqual((Dictionary<string, object>) this.insert, (Dictionary<string, object>) other.insert) && dictComparer.Equals(this.attributes, other.attributes);
             }
             if (this.isRetain() && other.isRetain() ||
             this.isRetainObject() && other.isRetainObject())
@@ -83,11 +86,35 @@ namespace DotNetDelta
             return 0;
         }
 
+        private bool embedsAreEqual(Dictionary<string, object> dict1, Dictionary<string, object> dict2)
+        {
+                
+            // Check if both dictionaries are null
+            if (dict1 == null && dict2 == null)
+                return true;
+
+            // Check if either dictionary is null
+            if (dict1 == null || dict2 == null)
+                return false;
+
+            // Check if dictionaries have the same number of entries
+            if (dict1.Count != dict2.Count)
+                return false;
+
+            // Check if all keys from dict1 exist in dict2 with the same corresponding values
+            return dict1.All(kv => dict2.TryGetValue(kv.Key, out object value) && EqualityComparer<object>.Default.Equals(kv.Value, value));
+    
+        }
+
         public override string ToString()
         {
             if (this.isInsert())
             {
                 return "{insert: '" + this.insert + "' , attributes: " + this.attributes + "}";
+            }
+            if (this.isInsertEmbed())
+            {
+                return "{insert: {" + this.insert + "} , attributes: " + this.attributes + "}";
             }
             else if (this.isDelete())
             {
@@ -204,6 +231,14 @@ namespace DotNetDelta
 
 
 
+    }
+
+    public class OpType 
+    {
+        // Declare a static constant of type string
+        public static readonly string Insert = "insert";
+        public static readonly string Delete = "delete";
+        public static readonly string Retain = "retain";
     }
 
 }

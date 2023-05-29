@@ -6,15 +6,15 @@ namespace DotNetDelta
     /// <summary>
     /// An enumerator for an array of Op, with extra utility methods to traverse arrays in meaningful way
     /// </summary>
-    class OpIterator
+    public class OpIterator
     {
         
         private int index; // index of the current op
         private int offset; // offset into the current op
 
-        public Op[] ops;
+        public List<Op> ops { get; private set; } = new List<Op>();
 
-        public OpIterator(Op[] ops)
+        public OpIterator(List<Op> ops)
         {
             this.ops = ops;
             index = 0;
@@ -24,7 +24,7 @@ namespace DotNetDelta
 
         public bool HasNext()
         {
-            return PeekLength() < long.MaxValue;
+            return PeekLength() < int.MaxValue;
         }
 
         /// <summary>
@@ -36,11 +36,11 @@ namespace DotNetDelta
         /// <returns>The sum of the two integers.</returns>
         public Op Next(int length = int.MaxValue)
         {
-            Op nextOp = ops[index];
-            if (nextOp == null)
+            if (ops.Count == 0 || index >= ops.Count)
             {
                 return Op.Retain(int.MaxValue);
             }
+            Op nextOp = ops[index];
             int offset = this.offset;
             int opLength = Op.Length(nextOp);
             if (length >= opLength - offset)
@@ -89,61 +89,65 @@ namespace DotNetDelta
         }
 
 
-        public Op Peek()
+        public Op? Peek()
         {
-            return ops[index];
+            return ops.Count > 0 ? ops[index] : null;
         }
 
 
-        public long PeekLength()
+        public int PeekLength()
         {
-            if (ops[index] == null)
+            if (ops.Count == 0 || index >= ops.Count)
             {
-                return long.MaxValue;
+                return int.MaxValue;
             }
             return Op.Length(ops[index]) - offset;
         }
 
         public string PeekType()
         {
-            Op op = ops[index];
+            Op? op = ops.Count > 0 ? ops[index] : null;
             if (op == null)
             {
-                return "retain";
+                return OpType.Retain;
             }
             if (op.insert != null)
             {
-                return "insert";
+                return OpType.Insert;
             }
             if (op.delete != null)
             {
-                return "delete";
+                return OpType.Delete;
             }
             if (op.retain != null)
             {
-                return "retain";
+                return OpType.Retain;
             }
-            return "retain";
+            return OpType.Retain;
         }
 
 
-        public Op[] Rest()
+        public List<Op> Rest()
         {
             if (!HasNext())
             {
-                return new Op[0];
+                return new List<Op>();
             }
             else if (this.offset == 0)
             {
-                return ops.Skip(this.index).ToArray();
+                return this.ops.Skip(this.index).ToList();
             }
             int offset = this.offset;
             int index = this.index;
             Op next = Next();
-            Op[] rest = this.ops.Skip(this.index).ToArray();
+            List<Op> rest = this.ops.Skip(this.index).ToList();
             this.offset = offset;
             this.index = index;
-            return new Op[] { next }.Concat(rest).ToArray();
+            // return new Op[] { next }.Concat(rest).ToArray();
+            List<Op> list = new List<Op>();
+            list.Add(next);
+            list.AddRange(rest);
+            return list;
         }
     }
 }

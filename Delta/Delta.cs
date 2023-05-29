@@ -3,7 +3,7 @@ namespace DotNetDelta
 
     public class Delta
     {
-        
+
         public List<Op> Ops { get; set; }
 
         public Delta()
@@ -84,7 +84,7 @@ namespace DotNetDelta
                 Ops[index - 1] = Op.Delete(lastOp.delete.Value + newOp.delete.Value);
                 return this;
             }
-            
+
             // Put the insert before the delete
             if (lastOp.isDelete() && (newOp.isInsert() || newOp.isInsertEmbed()))
             {
@@ -96,21 +96,22 @@ namespace DotNetDelta
                 }
             }
 
-            if (newOp.attributes?.SequenceEqual(lastOp.attributes) ?? lastOp.attributes == null)
-            {   
+            if (newOp.attributes == null && lastOp.attributes == null ||
+             (newOp.attributes?.SequenceEqual(lastOp.attributes ?? new AttributeMap()) ?? lastOp.attributes == null))
+            {
                 System.Console.WriteLine("Both attributes are equal");
                 // Merge insert into previous insert
                 if (lastOp.isInsert() && newOp.isInsert())
                 {
                     System.Console.WriteLine("Merging inserts");
-                    Ops[index - 1] = Op.Insert((string) lastOp.insert + (string) newOp.insert, lastOp.attributes);
+                    Ops[index - 1] = Op.Insert((string)lastOp.insert + (string)newOp.insert, lastOp.attributes);
                     return this;
                 }
 
                 // Merge retain into previous retain
                 if (lastOp.isRetain() && newOp.isRetain())
                 {
-                    Ops[index - 1] = Op.Retain((int) lastOp.retain + (int) newOp.retain, lastOp.attributes);
+                    Ops[index - 1] = Op.Retain((int)lastOp.retain + (int)newOp.retain, lastOp.attributes);
                     return this;
                 }
             }
