@@ -1,23 +1,31 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace DotNetDelta
 {
 
     public class Delta
     {
+        private List<Op> _ops;
 
-        public List<Op> Ops { get; set; }
+        public List<Op> Ops
+        {
+            get => _ops;
+            set => _ops = value;
+        }
 
         public Delta()
         {
-            this.Ops = new List<Op>();
+            Ops = new List<Op>();
         }
-        public Delta(Op[] Ops)
+        public Delta(List<Op> Ops)
         {
             this.Ops = new List<Op>(Ops);
         }
 
         public Delta(Delta delta)
         {
-            this.Ops = new List<Op>(delta.Ops);
+            Ops = new List<Op>(delta.Ops);
         }
 
 
@@ -68,10 +76,9 @@ namespace DotNetDelta
         public Delta Push(Op op)
         {
             int index = Ops.Count;
-            Op newOp = Op.clone(op);
+            Op newOp = Op.Clone(op);
             if (index == 0)
             {
-                System.Console.WriteLine("Adding first op");
                 Ops.Add(newOp);
                 return this;
             }
@@ -79,14 +86,14 @@ namespace DotNetDelta
             Op lastOp = Ops[index - 1];
 
             // Merge delete into previous delete
-            if (lastOp.isDelete() && newOp.isDelete())
+            if (lastOp.IsDelete() && newOp.IsDelete())
             {
                 Ops[index - 1] = Op.Delete(lastOp.delete.Value + newOp.delete.Value);
                 return this;
             }
 
             // Put the insert before the delete
-            if (lastOp.isDelete() && (newOp.isInsert() || newOp.isInsertEmbed()))
+            if (lastOp.IsDelete() && (newOp.IsInsert() || newOp.IsInsertEmbed()))
             {
                 index--;
                 if (index == 0)
@@ -99,17 +106,15 @@ namespace DotNetDelta
             if (newOp.attributes == null && lastOp.attributes == null ||
              (newOp.attributes?.SequenceEqual(lastOp.attributes ?? new AttributeMap()) ?? lastOp.attributes == null))
             {
-                System.Console.WriteLine("Both attributes are equal");
                 // Merge insert into previous insert
-                if (lastOp.isInsert() && newOp.isInsert())
+                if (lastOp.IsInsert() && newOp.IsInsert())
                 {
-                    System.Console.WriteLine("Merging inserts");
                     Ops[index - 1] = Op.Insert((string)lastOp.insert + (string)newOp.insert, lastOp.attributes);
                     return this;
                 }
 
                 // Merge retain into previous retain
-                if (lastOp.isRetain() && newOp.isRetain())
+                if (lastOp.IsRetain() && newOp.IsRetain())
                 {
                     Ops[index - 1] = Op.Retain((int)lastOp.retain + (int)newOp.retain, lastOp.attributes);
                     return this;
@@ -118,18 +123,162 @@ namespace DotNetDelta
 
             if (index == this.Ops.Count)
             {
-                System.Console.WriteLine("Adding op to end");
                 Ops.Add(newOp);
             }
             else
             {
-                System.Console.WriteLine("Inserting op at index " + index);
                 Ops.Insert(index, newOp);
             }
             return this;
-
         }
 
+        public Delta Chop()
+        {
+            if (Ops.Count > 0)
+            {
+                Op lastOp = Ops[Ops.Count - 1];
+                if (lastOp.IsRetain() && (lastOp.attributes == null || lastOp.attributes.Count == 0))
+                {
+                    Ops.RemoveAt(Ops.Count - 1);
+                }
+            }
+            return this;
+        }
+
+        public List<Op> Filter(Func<Op, int, bool> filter)
+        {
+            return Ops.Where(filter).ToList();
+        }
+
+        public void ForEach(Action<Op, int> action)
+        {
+            for (int i = 0; i < Ops.Count; i++)
+            {
+                action(Ops[i], i);
+            }
+        }
+
+        public List<T> Map<T>(Func<Op, int, T> mappingFunction)
+        {
+            List<T> result = new List<T>();
+            for (int i = 0; i < Ops.Count; i++)
+            {
+                result.Add(mappingFunction(Ops[i], i));
+            }
+            return result;
+        }
+
+        public (List<Op>, List<Op>) Partition(Func<Op, bool> predicate)
+        {
+            var passed = new List<Op>();
+            var failed = new List<Op>();
+            foreach (var op in Ops)
+            {
+                if (predicate(op))
+                {
+                    passed.Add(op);
+                }
+                else
+                {
+                    failed.Add(op);
+                }
+            }
+            return (passed, failed);
+        }
+        
+        public T Reduce<T>(Func<T, Op, int, T> reducer, T initialValue)
+        {
+            T result = initialValue;
+            for (var i = 0; i < Ops.Count; i++)
+            {
+                result = reducer(result, Ops[i], i);
+            }
+
+            return result;
+        }
+        
+        public int ChangeLength()
+        {
+            return Reduce<int>((accumLength, currentOp, index) =>
+            {
+                if (currentOp.IsInsert())
+                {
+                    return accumLength + ((string)currentOp.insert).Length;
+                }
+                if (currentOp.IsDelete())
+                {
+                    return accumLength - (int)currentOp.delete;
+                }
+
+                return accumLength;
+            }, 0);
+        }
+        
+        public int Length()
+        {
+            return Reduce((accumLength, currentOp, index) => accumLength + Op.Length(currentOp), 0);
+        }
+
+        public Delta Slice(int start = 0, int end = int.MaxValue)
+        {
+            List<Op> newOps = new List<Op>();
+            var opIterator = new OpIterator(Ops);
+            var index = 0;
+            while (index < end && opIterator.HasNext())
+            {
+                Op nextOp;
+                if (index < start)
+                {
+                    nextOp = opIterator.Next(start - index);
+                }
+                else
+                {
+                    nextOp = opIterator.Next(end - index);
+                    newOps.Add(nextOp);
+                }
+                index += Op.Length(nextOp);
+            }
+            return new Delta(newOps);
+        }
+
+
+        // Generate Equals and GetHashCode methods
+        public override bool Equals(object? obj)
+        {
+            // Ask if obj is not of type Delta
+            if (!(obj is Delta otherDelta))
+                return false;
+
+            // Check if both dictionaries are null
+            if (otherDelta == null)
+                return false;
+
+            // Check if dictionaries have the same number of entries
+            if (Ops.Count != otherDelta.Ops.Count)
+                return false;
+
+            // Check if all keys from dict1 exist in dict2 with the same corresponding values
+            return Ops.SequenceEqual(otherDelta.Ops);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Ops);
+        }
+
+        public override string ToString()
+        {
+            var options = new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true
+            };
+
+            return JsonSerializer.Serialize(this, options);
+        }
+        
+        
+        
 
 
     }

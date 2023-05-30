@@ -5,8 +5,8 @@ namespace DotNetDelta
 
     public class Op
     {
-        private static IEqualityComparer<object> comparer = EqualityComparer<object>.Default;
-        private static IEqualityComparer<Dictionary<string, object>> dictComparer = EqualityComparer<Dictionary<string, object>>.Default;
+        private static readonly IEqualityComparer<object> comparer = EqualityComparer<object>.Default;
+        private static readonly IEqualityComparer<Dictionary<string, object>> dictComparer = EqualityComparer<Dictionary<string, object>>.Default;
         
         // Only one property out of {insert, delete, retain} will be present
         public object? insert { get; set; }
@@ -15,29 +15,29 @@ namespace DotNetDelta
         public AttributeMap? attributes { get; set; }
 
 
-        public bool isInsert()
+        public bool IsInsert()
         {
             return insert is string && insert != null;
         }
 
-        public bool isInsertEmbed()
+        public bool IsInsertEmbed()
         {
-            return insert is object && insert != null;
+            return insert is not string && insert != null;
         }
 
-        public bool isDelete()
+        public bool IsDelete()
         {
-            return delete is int && delete != null;
+            return delete is not null;
         }
 
-        public bool isRetain()
+        public bool IsRetain()
         {
             return retain is int && retain != null;
         }
 
-        public bool isRetainObject()
+        public bool IsRetainObject()
         {
-            return retain is object && retain != null;
+            return retain is not string && retain != null;
         }
 
         public override bool Equals(object? obj)
@@ -49,20 +49,20 @@ namespace DotNetDelta
                 
 
             Op other = (Op)obj;
-            if (this.isInsert() && other.isInsert())
+            if (this.IsInsert() && other.IsInsert())
             {
                 return comparer.Equals(this.insert, other.insert) && dictComparer.Equals(this.attributes, other.attributes);
             }
-            if (this.isInsertEmbed() && other.isInsertEmbed())
+            if (this.IsInsertEmbed() && other.IsInsertEmbed())
             {
                 return embedsAreEqual((Dictionary<string, object>) this.insert, (Dictionary<string, object>) other.insert) && dictComparer.Equals(this.attributes, other.attributes);
             }
-            if (this.isRetain() && other.isRetain() ||
-            this.isRetainObject() && other.isRetainObject())
+            if (this.IsRetain() && other.IsRetain() ||
+            this.IsRetainObject() && other.IsRetainObject())
             {
                 return comparer.Equals(this.retain, other.retain) && dictComparer.Equals(this.attributes, other.attributes);
             }
-            if (this.isDelete() && other.isDelete())
+            if (this.IsDelete() && other.IsDelete())
             {
                 return comparer.Equals(this.delete, other.delete);
             }
@@ -71,22 +71,22 @@ namespace DotNetDelta
 
         public override int GetHashCode()
         {
-            if (this.isInsert() || this.isInsertEmbed())
+            if (this.IsInsert() || this.IsInsertEmbed())
             {
                 return comparer.GetHashCode(this.insert) ^ dictComparer.GetHashCode(this.attributes);
             }
-            if (this.isRetain() || this.isRetainObject())
+            if (this.IsRetain() || this.IsRetainObject())
             {
                 return comparer.GetHashCode(this.retain) ^ dictComparer.GetHashCode(this.attributes);
             }
-            if (this.isDelete())
+            if (this.IsDelete())
             {
                 return comparer.GetHashCode(this.delete);
             }
             return 0;
         }
 
-        private bool embedsAreEqual(Dictionary<string, object> dict1, Dictionary<string, object> dict2)
+        private bool embedsAreEqual(Dictionary<string, object>? dict1, Dictionary<string, object>? dict2)
         {
                 
             // Check if both dictionaries are null
@@ -108,23 +108,23 @@ namespace DotNetDelta
 
         public override string ToString()
         {
-            if (this.isInsert())
+            if (this.IsInsert())
             {
                 return "{insert: '" + this.insert + "' , attributes: " + this.attributes + "}";
             }
-            if (this.isInsertEmbed())
+            if (this.IsInsertEmbed())
             {
                 return "{insert: {" + this.insert + "} , attributes: " + this.attributes + "}";
             }
-            else if (this.isDelete())
+            else if (this.IsDelete())
             {
                 return "{delete: " + this.delete + "}";
             }
-            else if (this.isRetain())
+            else if (this.IsRetain())
             {
                 return "{retain: " + this.retain + ", attributes: " + this.attributes + "}";
             }
-            else if (this.isRetainObject())
+            else if (this.IsRetainObject())
             {
                 return "{retain: {" + this.retain + "}, attributes: " + this.attributes + "}";
             }
@@ -179,43 +179,43 @@ namespace DotNetDelta
             {
                 return op.delete.Value;
             }
-            else if (op.retain is int)
+
+            if (op.retain is int)
             {
                 return (int)op.retain;
             }
-            else if (op.retain is object && op.retain != null)
+
+            if (op.retain is object && op.retain != null)
             {
                 return 1;
             }
-            else
-            {
-                return op.insert is string ? ((string)op.insert).Length : 1;
-            }
+
+            return op.insert is string ? ((string)op.insert).Length : 1;
         }
 
-        public static Op clone(Op op)
+        public static Op Clone(Op op)
         {
             Op newOp = new Op();
-            if (op.isInsert())
+            if (op.IsInsert())
             {
                 newOp.insert = op.insert;
             }
-            else if (op.isInsertEmbed())
+            else if (op.IsInsertEmbed())
             {
                 // Clone Object with a shallow copy
                 // TODO: Actually clone the object
                 newOp.insert = op.insert;
 
             }
-            else if (op.isDelete())
+            else if (op.IsDelete())
             {
                 newOp.delete = op.delete;
             }
-            else if (op.isRetain())
+            else if (op.IsRetain())
             {
                 newOp.retain = op.retain;
             }
-            else if (op.isRetainObject())
+            else if (op.IsRetainObject())
             {
                 // Clone Object with a shallow copy
                 // TODO: Actually clone the object
@@ -233,12 +233,12 @@ namespace DotNetDelta
 
     }
 
-    public class OpType 
+    public static class OpType 
     {
         // Declare a static constant of type string
-        public static readonly string Insert = "insert";
-        public static readonly string Delete = "delete";
-        public static readonly string Retain = "retain";
+        public const string Insert = "insert";
+        public const string Delete = "delete";
+        public const string Retain = "retain";
     }
 
 }

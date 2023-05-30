@@ -9,16 +9,16 @@ namespace DotNetDelta
     public class OpIterator
     {
         
-        private int index; // index of the current op
-        private int offset; // offset into the current op
+        private int _index; // index of the current op
+        private int _offset; // offset into the current op
 
-        public List<Op> ops { get; private set; } = new List<Op>();
+        private List<Op> ops { get; }
 
         public OpIterator(List<Op> ops)
         {
             this.ops = ops;
-            index = 0;
-            offset = 0;
+            _index = 0;
+            _offset = 0;
         }
 
 
@@ -31,33 +31,32 @@ namespace DotNetDelta
         /// Iterate through the ops array, returning the next op. If length is specified, then the next op will be returned only if it is at least length long.
         /// This allows iterating through the ops array, not only by op, but also by character.
         /// </summary>
-        /// <param name="a">The first integer.</param>
-        /// <param name="b">The second integer.</param>
+        /// <param name="length">The character offset for the op that we need</param>
         /// <returns>The sum of the two integers.</returns>
         public Op Next(int length = int.MaxValue)
         {
-            if (ops.Count == 0 || index >= ops.Count)
+            if (ops.Count == 0 || _index >= ops.Count)
             {
                 return Op.Retain(int.MaxValue);
             }
-            Op nextOp = ops[index];
-            int offset = this.offset;
+            Op nextOp = ops[_index];
+            int offset = _offset;
             int opLength = Op.Length(nextOp);
             if (length >= opLength - offset)
             {
                 // If the requested length is greater than the total length (or the remainder length) of the current op, then we position ourselves in the beginning of the next op
                 length = opLength - offset;
-                this.index++;
-                this.offset = 0;
+                _index++;
+                _offset = 0;
             }
             else
             {
                 // Otherwise, we just move the offset forward in the current op
-                this.offset += length;
+                _offset += length;
             }
 
             // At this point we have the position of the next op and the length of the next op. Now we have to determine what the next op is.
-            if (nextOp.isDelete())
+            if (nextOp.IsDelete())
             {
                 return Op.Delete(length);
             }
@@ -66,19 +65,19 @@ namespace DotNetDelta
                 Op opToReturn = new Op();
                 opToReturn.attributes = nextOp.attributes;
 
-                if (nextOp.isRetain())
+                if (nextOp.IsRetain())
                 {
                     opToReturn.retain = length;
                 }
-                else if (nextOp.isRetainObject())
+                else if (nextOp.IsRetainObject())
                 {
                     opToReturn.retain = nextOp.retain;
                 }
-                else if (nextOp.isInsert())
+                else if (nextOp.IsInsert())
                 {
                     opToReturn.insert = ((string)nextOp.insert).Substring(offset, length);
                 }
-                else if (nextOp.isInsertEmbed())
+                else if (nextOp.IsInsertEmbed())
                 {
                     opToReturn.insert = nextOp.insert;
                 }
@@ -91,22 +90,22 @@ namespace DotNetDelta
 
         public Op? Peek()
         {
-            return ops.Count > 0 ? ops[index] : null;
+            return ops.Count > 0 ? ops[_index] : null;
         }
 
 
         public int PeekLength()
         {
-            if (ops.Count == 0 || index >= ops.Count)
+            if (ops.Count == 0 || _index >= ops.Count)
             {
                 return int.MaxValue;
             }
-            return Op.Length(ops[index]) - offset;
+            return Op.Length(ops[_index]) - _offset;
         }
 
         public string PeekType()
         {
-            Op? op = ops.Count > 0 ? ops[index] : null;
+            Op? op = ops.Count > 0 ? ops[_index] : null;
             if (op == null)
             {
                 return OpType.Retain;
@@ -119,10 +118,6 @@ namespace DotNetDelta
             {
                 return OpType.Delete;
             }
-            if (op.retain != null)
-            {
-                return OpType.Retain;
-            }
             return OpType.Retain;
         }
 
@@ -133,16 +128,17 @@ namespace DotNetDelta
             {
                 return new List<Op>();
             }
-            else if (this.offset == 0)
+
+            if (_offset == 0)
             {
-                return this.ops.Skip(this.index).ToList();
+                return ops.Skip(_index).ToList();
             }
-            int offset = this.offset;
-            int index = this.index;
+            int offset = _offset;
+            int index = _index;
             Op next = Next();
-            List<Op> rest = this.ops.Skip(this.index).ToList();
-            this.offset = offset;
-            this.index = index;
+            List<Op> rest = ops.Skip(_index).ToList();
+            _offset = offset;
+            _index = index;
             // return new Op[] { next }.Concat(rest).ToArray();
             List<Op> list = new List<Op>();
             list.Add(next);

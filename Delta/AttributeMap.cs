@@ -45,7 +45,7 @@ namespace DotNetDelta {
         /// <summary>
         /// Composes two attribute maps into a new attribute map. Composition is just merging the two maps.
         /// </summary>
-        public static AttributeMap Compose(AttributeMap a, AttributeMap b, bool keepNull = false) 
+        public static AttributeMap Compose(AttributeMap? a, AttributeMap? b, bool keepNull = false) 
         {
             if (a == null)
             {
@@ -79,7 +79,7 @@ namespace DotNetDelta {
         /// <summary>
         /// Returns the difference between two attribute maps. The difference is an AttributeMap with entries that are in b but not in a.
         /// </summary>
-        public static AttributeMap Diff(AttributeMap a, AttributeMap b)
+        public static AttributeMap Diff(AttributeMap? a, AttributeMap? b)
         {
             if (a == null)
             {
@@ -127,7 +127,7 @@ namespace DotNetDelta {
         /// Returns another AttributeMap that would "undo" the changes that the composition of "attributes" and "base" would make to "base".
         /// That is: invert(compose(base, attributes), attributes) == base
         /// </summary>
-        public static AttributeMap Invert(AttributeMap modifingAttributes, AttributeMap baseAttributes)
+        public static AttributeMap Invert(AttributeMap? modifingAttributes, AttributeMap baseAttributes)
         {
             if (modifingAttributes == null)
             {
@@ -168,7 +168,7 @@ namespace DotNetDelta {
         /// Priority determines whether the transformation only applies to attributes that are not defined in left. If true, 
         /// only new attributes are added to the resulting transformation; otherwise, the transformation is just right.
         /// </summary>
-        public static AttributeMap? Transform(AttributeMap left, AttributeMap right, bool priority = false)
+        public static AttributeMap? Transform(AttributeMap? left, AttributeMap? right, bool priority = false)
         {
             if (left == null)
             {

@@ -7,49 +7,55 @@ namespace DotNetDelta.Tests
         // Compose Tests
         //--------------------------------------------------------------------------------
         [Test]
-        public void Test_Compose_WhenArgumentsAreNull()
+        public void Compose_WhenArgumentsAreNull_ShouldReturnEmptyAttributes()
         {
-            AttributeMap nonNull = new AttributeMap() {{"key", "value"}};
-            Assert.AreEqual(nonNull, AttributeMap.Compose(null, nonNull));
-            Assert.AreEqual(nonNull, AttributeMap.Compose(nonNull, null));
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Compose(null, null));
+            var nonNull = new AttributeMap() {{"key", "value"}};
+            Assert.Multiple(() =>
+            {
+                Assert.That(AttributeMap.Compose(null, nonNull), Is.EqualTo(nonNull));
+                Assert.That(AttributeMap.Compose(nonNull, null), Is.EqualTo(nonNull));
+                Assert.That(AttributeMap.Compose(null, null), Is.EqualTo(new AttributeMap()));
+            });
         }
 
         [Test]
-        public void Test_Compose_WhenArgumentsAreEmpty()
+        public void Compose_WhenArgumentsAreEmpty_ShouldReturnEmptyAttributes()
         {
-            AttributeMap nonEmpty = new AttributeMap() {{"key", "value"}};
-            AttributeMap empty = new AttributeMap();
-            Assert.AreEqual(nonEmpty, AttributeMap.Compose(empty, nonEmpty));
-            Assert.AreEqual(nonEmpty, AttributeMap.Compose(nonEmpty, empty));
-            Assert.AreEqual(empty, AttributeMap.Compose(empty, empty));
+            var nonEmpty = new AttributeMap() {{"key", "value"}};
+            var empty = new AttributeMap();
+            Assert.Multiple(() =>
+            {
+                Assert.That(AttributeMap.Compose(empty, nonEmpty), Is.EqualTo(nonEmpty));
+                Assert.That(AttributeMap.Compose(nonEmpty, empty), Is.EqualTo(nonEmpty));
+                Assert.That(AttributeMap.Compose(empty, empty), Is.EqualTo(empty));
+            });
         }
 
         [Test]
-        public void Test_Compose_AddsMissing()
+        public void Compose_WhenAddingMissing_ShouldReturnMergedAttributes()
         {
-            AttributeMap first = new AttributeMap() {{"bold", true}, {"color", "red"}};
-            AttributeMap second = new AttributeMap() {{"italic", true}};
-            AttributeMap expected = new AttributeMap() {{"bold", true}, {"color", "red"}, {"italic", true}};
-            Assert.AreEqual(expected, AttributeMap.Compose(first, second));
+            var first = new AttributeMap() {{"bold", true}, {"color", "red"}};
+            var second = new AttributeMap() {{"italic", true}};
+            var expected = new AttributeMap() {{"bold", true}, {"color", "red"}, {"italic", true}};
+            Assert.That(AttributeMap.Compose(first, second), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Test_Compose_OverwritesExisting()
+        public void Compose_WhenAddingExisting_OverwritesExisting()
         {
-            AttributeMap first = new AttributeMap() {{"bold", true}, {"color", "red"}};
-            AttributeMap second = new AttributeMap() {{"color", "blue"}};
-            AttributeMap expected = new AttributeMap() {{"bold", true}, {"color", "blue"}};
-            Assert.AreEqual(expected, AttributeMap.Compose(first, second));
+            var first = new AttributeMap() {{"bold", true}, {"color", "red"}};
+            var second = new AttributeMap() {{"color", "blue"}};
+            var expected = new AttributeMap() {{"bold", true}, {"color", "blue"}};
+            Assert.That(AttributeMap.Compose(first, second), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Test_Compose_RemovesExisting()
+        public void Compose_WhenRemovesExisting_ShouldReturnAttributesWithoutTheRemoved()
         {
-            AttributeMap first = new AttributeMap() {{"bold", true}, {"color", "red"}};            
-            AttributeMap second = new AttributeMap() {{"color", null}};
-            AttributeMap expected = new AttributeMap() {{"bold", true}};
-            Assert.AreEqual(expected, AttributeMap.Compose(first, second));
+            var first = new AttributeMap() {{"bold", true}, {"color", "red"}};            
+            var second = new AttributeMap() {{"color", null}};
+            var expected = new AttributeMap() {{"bold", true}};
+            Assert.That(AttributeMap.Compose(first, second), Is.EqualTo(expected));
         }
 
         //--------------------------------------------------------------------------------
@@ -59,62 +65,62 @@ namespace DotNetDelta.Tests
 
 
         [Test]
-        public void Test_Diff_WhenLeftIsNull()
+        public void Diff_WhenLeftIsNull_ShouldReturnRight()
         {
-            AttributeMap format = new AttributeMap() {{"bold", true}, {"color", "red"}};
-            Assert.AreEqual(format, AttributeMap.Diff(null, format));
+            var format = new AttributeMap() {{"bold", true}, {"color", "red"}};
+            Assert.That(AttributeMap.Diff(null, format), Is.EqualTo(format));
         }
 
         [Test]
-        public void Test_Diff_WhenRightIsNull()
+        public void Diff_WhenRightIsNull_ShouldReturnLeftAttributesWithNullValues()
         {
-            AttributeMap format = new AttributeMap() {{"bold", true}, {"color", "red"}};
-            AttributeMap expected = new AttributeMap() {{"bold", null}, {"color", null}};
-            Assert.AreEqual(expected, AttributeMap.Diff(format, null));
-        }
-
-
-        [Test]
-        public void Test_Diff_WhenBothArgumentsAreNull()
-        {
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Diff(null, null));
+            var format = new AttributeMap() {{"bold", true}, {"color", "red"}};
+            var expected = new AttributeMap() {{"bold", null}, {"color", null}};
+            Assert.That(AttributeMap.Diff(format, null), Is.EqualTo(expected));
         }
 
 
         [Test]
-        public void Test_Diff_WhenBothArgumentsAreSame()
+        public void Diff_WhenBothArgumentsAreNull_ShouldReturnEmptyAttributes()
         {
-            AttributeMap format = new AttributeMap() {{"bold", true}, {"color", "red"}};
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Diff(format, format));
+            Assert.That(AttributeMap.Diff(null, null), Is.EqualTo(new AttributeMap()));
+        }
+
+
+        [Test]
+        public void Diff_WhenBothArgumentsAreSame_ShouldReturnEmptyAttributes()
+        {
+            var format = new AttributeMap() {{"bold", true}, {"color", "red"}};
+            Assert.That(AttributeMap.Diff(format, format), Is.EqualTo(new AttributeMap()));
         }
 
         [Test]
-        public void Test_Diff_WhenAddingFormat()
+        public void Diff_WhenKeepingSomeAttributeValuesAndAddingNewOnes_ShouldReturnNewAttributesOnly()
         {
-            AttributeMap format = new AttributeMap() {{"bold", true}, {"color", "red"}};
-            AttributeMap added = new AttributeMap() {{"bold", true}, {"italic", true}, {"color", "red"}};
+            var format = new AttributeMap() {{"bold", true}, {"color", "red"}};
+            var added = new AttributeMap() {{"bold", true}, {"italic", true}, {"color", "red"}};
 
-            AttributeMap expected = new AttributeMap() {{"italic", true}};
+            var expected = new AttributeMap() {{"italic", true}};
            
-            Assert.AreEqual(expected, AttributeMap.Diff(format, added));
+            Assert.That(AttributeMap.Diff(format, added), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Test_Diff_WhenRemovingFormat()
+        public void Diff_WhenRemovingAnAttribute_ShouldReturnRemovedAttributeWithNullValue()
         {
-            AttributeMap format = new AttributeMap() {{"bold", true}, {"color", "red"}};
-            AttributeMap removing = new AttributeMap() {{"bold", true}};
-            AttributeMap expected = new AttributeMap() {{"color", null}}; 
-            Assert.AreEqual(expected, AttributeMap.Diff(format, removing));
+            var format = new AttributeMap() {{"bold", true}, {"color", "red"}};
+            var removing = new AttributeMap() {{"bold", true}};
+            var expected = new AttributeMap() {{"color", null}}; 
+            Assert.That(AttributeMap.Diff(format, removing), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Test_Diff_WhenOverwritingFormat()
+        public void Diff_WhenOverwritingFormat_ShouldReturnOnlyTheOverritenAttribute()
         {
-            AttributeMap format = new AttributeMap() {{"bold", true}, {"color", "red"}};
-            AttributeMap overwriting = new AttributeMap() {{"bold", true}, {"color", "blue"}};
-            AttributeMap expected = new AttributeMap() {{ "color", "blue" }};
-            Assert.AreEqual(expected, AttributeMap.Diff(format, overwriting));
+            var format = new AttributeMap() {{"bold", true}, {"color", "red"}};
+            var overwriting = new AttributeMap() {{"bold", true}, {"color", "blue"}};
+            var expected = new AttributeMap() {{ "color", "blue" }};
+            Assert.That(AttributeMap.Diff(format, overwriting), Is.EqualTo(expected));
         }
 
         //--------------------------------------------------------------------------------
@@ -122,84 +128,84 @@ namespace DotNetDelta.Tests
         //--------------------------------------------------------------------------------
 
         [Test]
-        public void Test_Invert_WhenArgumentIsNull()
+        public void Invert_WhenArgumentIsNull()
         {
-            AttributeMap baseAttributes = new AttributeMap() {{"bold", true}};
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Invert(null, baseAttributes));
+            var baseAttributes = new AttributeMap() {{"bold", true}};
+            Assert.That(AttributeMap.Invert(null, baseAttributes), Is.EqualTo(new AttributeMap()));
         }
 
 
         [Test]
-        public void Test_Invert_WhenBaseIsNull()
+        public void Invert_WhenBaseIsNull()
         {
-            AttributeMap appliedAttributes = new AttributeMap() {{"bold", true}, {"color", "red"}};
-            AttributeMap expected = new AttributeMap() {{"bold", null}, {"color", null}};
-            Assert.AreEqual(expected, AttributeMap.Invert(appliedAttributes, null));
+            var appliedAttributes = new AttributeMap() {{"bold", true}, {"color", "red"}};
+            var expected = new AttributeMap() {{"bold", null}, {"color", null}};
+            Assert.That(AttributeMap.Invert(appliedAttributes, null), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Test_Invert_WhenBothArgumentsAreNull()
+        public void Invert_WhenBothArgumentsAreNull()
         {
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Invert(null, null));
+            Assert.That(AttributeMap.Invert(null, null), Is.EqualTo(new AttributeMap()));
         }
 
         [Test]
-        public void Test_Invert_WhenBaseWasModifiedByAnotherAttributeMapAddingAttributes()
+        public void Invert_WhenBaseWasModifiedByAnotherAttributeMapAddingAttributes()
         {
-            AttributeMap baseAttributes = new AttributeMap() {{"italic", true}};
-            AttributeMap appliedAttributes = new AttributeMap() {{"bold", true}};
-            AttributeMap expected = new AttributeMap() {{"bold", null}};
-            Assert.AreEqual(expected, AttributeMap.Invert(appliedAttributes, baseAttributes));
+            var baseAttributes = new AttributeMap() {{"italic", true}};
+            var appliedAttributes = new AttributeMap() {{"bold", true}};
+            var expected = new AttributeMap() {{"bold", null}};
+            Assert.That(AttributeMap.Invert(appliedAttributes, baseAttributes), Is.EqualTo(expected));
         }
 
 
         [Test]
-        public void Test_Invert_WhenBaseWasModifiedByAnotherAttributeMapThatNullifiesAttribute()
+        public void Invert_WhenBaseWasModifiedByAnotherAttributeMapThatNullifiesAttribute()
         {
-            AttributeMap baseAttributes = new AttributeMap() {{"bold", true}};
-            AttributeMap appliedAttributes = new AttributeMap() {{"bold", null}};
-            AttributeMap expected = new AttributeMap() {{"bold", true}};
-            Assert.AreEqual(expected, AttributeMap.Invert(appliedAttributes, baseAttributes));
+            var baseAttributes = new AttributeMap() {{"bold", true}};
+            var appliedAttributes = new AttributeMap() {{"bold", null}};
+            var expected = new AttributeMap() {{"bold", true}};
+            Assert.That(AttributeMap.Invert(appliedAttributes, baseAttributes), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Test_Invert_WhenBaseWasModifiedByAnotherAttributeMapReplacingAttributes()
+        public void Invert_WhenBaseWasModifiedByAnotherAttributeMapReplacingAttributes()
         {
-            AttributeMap baseAttributes = new AttributeMap() {{"color", "blue"}};
-            AttributeMap appliedAttributes = new AttributeMap() {{"color", "red"}};
-            AttributeMap expected = baseAttributes;
-            Assert.AreEqual(expected, AttributeMap.Invert(appliedAttributes, baseAttributes));
+            var baseAttributes = new AttributeMap() {{"color", "blue"}};
+            var appliedAttributes = new AttributeMap() {{"color", "red"}};
+            var expected = baseAttributes;
+            Assert.That(AttributeMap.Invert(appliedAttributes, baseAttributes), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Test_Invert_WhenANotModifyingAttributeApplied()
+        public void Invert_WhenANotModifyingAttributeApplied()
         {
-            AttributeMap baseAttributes = new AttributeMap() {{"color", "blue"}};
-            AttributeMap appliedAttributes = new AttributeMap() {{"color", "blue"}};
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Invert(appliedAttributes, baseAttributes));
+            var baseAttributes = new AttributeMap() {{"color", "blue"}};
+            var appliedAttributes = new AttributeMap() {{"color", "blue"}};
+            Assert.That(AttributeMap.Invert(appliedAttributes, baseAttributes), Is.EqualTo(new AttributeMap()));
         }
 
         [Test]
-        public void Test_Invert_WhenBaseWasModifiedByAnotherAttributeMapAddingAndRemovingAttributes()
+        public void Invert_WhenBaseWasModifiedByAnotherAttributeMapAddingAndRemovingAttributes()
         {
-            AttributeMap baseAttributes = new AttributeMap();
+            var baseAttributes = new AttributeMap();
             baseAttributes["font"] = "serif";
             baseAttributes["italic"] = true;
             baseAttributes["color"] = "blue";
             baseAttributes["size"] = "12px";
 
-            AttributeMap appliedAttributes = new AttributeMap();
+            var appliedAttributes = new AttributeMap();
             appliedAttributes["bold"] = true; // add
             appliedAttributes["italic"] = null; // remove
             appliedAttributes["color"] = "red"; // replace
             appliedAttributes["size"] = "12px"; // not modified
 
-            AttributeMap expected = new AttributeMap();
+            var expected = new AttributeMap();
             expected["bold"] = null; 
             expected["italic"] = true;
             expected["color"] = "blue";
 
-            Assert.AreEqual(expected, AttributeMap.Invert(appliedAttributes, baseAttributes));
+            Assert.That(AttributeMap.Invert(appliedAttributes, baseAttributes), Is.EqualTo(expected));
         }
         
 
@@ -208,46 +214,55 @@ namespace DotNetDelta.Tests
         //--------------------------------------------------------------------------------
 
         [Test]
-        public void Test_Transform_WhenLeftIsNull()
+        public void Transform_WhenLeftIsNull()
         {
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null));
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null, true));
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, new AttributeMap()));
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, new AttributeMap(), true));
+            Assert.Multiple(() =>
+            {
+                Assert.That(AttributeMap.Transform(null, null), Is.EqualTo(new AttributeMap()));
+                Assert.That(AttributeMap.Transform(null, null, true), Is.EqualTo(new AttributeMap()));
+                Assert.That(AttributeMap.Transform(null, new AttributeMap()), Is.EqualTo(new AttributeMap()));
+                Assert.That(AttributeMap.Transform(null, new AttributeMap(), true), Is.EqualTo(new AttributeMap()));
+            });
         }
 
         [Test]
-        public void Test_Transform_WhenRightIsNull()
+        public void Transform_WhenRightIsNull()
         {
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null));
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null, true));
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(new AttributeMap(), null));
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(new AttributeMap(), null, true));
+            Assert.Multiple(() =>
+            {
+                Assert.That(AttributeMap.Transform(null, null), Is.EqualTo(new AttributeMap()));
+                Assert.That(AttributeMap.Transform(null, null, true), Is.EqualTo(new AttributeMap()));
+                Assert.That(AttributeMap.Transform(new AttributeMap(), null), Is.EqualTo(new AttributeMap()));
+                Assert.That(AttributeMap.Transform(new AttributeMap(), null, true), Is.EqualTo(new AttributeMap()));
+            });
         }
 
         [Test]
-        public void Test_Transform_WhenBothAreNull()
+        public void Transform_WhenBothAreNull()
         {
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null));
-            Assert.AreEqual(new AttributeMap(), AttributeMap.Transform(null, null, true));
+            Assert.Multiple(() =>
+            {
+                Assert.That(AttributeMap.Transform(null, null), Is.EqualTo(new AttributeMap()));
+                Assert.That(AttributeMap.Transform(null, null, true), Is.EqualTo(new AttributeMap()));
+            });
         }
 
         [Test]
-        public void Test_Transform_WithPriority()
+        public void Transform_WithPriority()
         {
-            AttributeMap left = new AttributeMap() {{"bold", true}, {"color", "red"}, {"font", null}}; 
-            AttributeMap right = new AttributeMap() {{"color", "blue"}, {"font", "serif"}, {"italic", true}};
-            AttributeMap expected = new AttributeMap() {{"italic", true}};
-            Assert.AreEqual(expected, AttributeMap.Transform(left, right, true));
+            var left = new AttributeMap() {{"bold", true}, {"color", "red"}, {"font", null}}; 
+            var right = new AttributeMap() {{"color", "blue"}, {"font", "serif"}, {"italic", true}};
+            var expected = new AttributeMap() {{"italic", true}};
+            Assert.That(AttributeMap.Transform(left, right, true), Is.EqualTo(expected));
         }
 
         [Test]
-        public void Test_Transform_WithoutPriority()
+        public void Transform_WithoutPriority()
         {
-            AttributeMap left = new AttributeMap() {{"bold", true}, {"color", "red"}, {"font", null}};
-            AttributeMap right = new AttributeMap() {{"color", "blue"}, {"font", "serif"}, {"italic", true}};
-            AttributeMap expected = right;
-            Assert.AreEqual(expected, AttributeMap.Transform(left, right, false));
+            var left = new AttributeMap() {{"bold", true}, {"color", "red"}, {"font", null}};
+            var right = new AttributeMap() {{"color", "blue"}, {"font", "serif"}, {"italic", true}};
+            var expected = right;
+            Assert.That(AttributeMap.Transform(left, right, false), Is.EqualTo(expected));
         }
 
 
