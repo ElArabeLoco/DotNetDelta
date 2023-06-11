@@ -51,16 +51,19 @@ namespace DotNetDelta
             Op other = (Op)obj;
             if (this.IsInsert() && other.IsInsert())
             {
-                return comparer.Equals(this.insert, other.insert) && dictComparer.Equals(this.attributes, other.attributes);
+                return comparer.Equals(this.insert, other.insert) && Utils.DictionaryEquals(this.attributes, other.attributes);
             }
             if (this.IsInsertEmbed() && other.IsInsertEmbed())
             {
-                return embedsAreEqual((Dictionary<string, object>) this.insert, (Dictionary<string, object>) other.insert) && dictComparer.Equals(this.attributes, other.attributes);
+                return Utils.DictionaryEquals((Dictionary<string, object>) insert, (Dictionary<string, object>) other.insert) && Utils.DictionaryEquals(attributes, other.attributes);
             }
-            if (this.IsRetain() && other.IsRetain() ||
-            this.IsRetainObject() && other.IsRetainObject())
+            if (this.IsRetain() && other.IsRetain())
             {
-                return comparer.Equals(this.retain, other.retain) && dictComparer.Equals(this.attributes, other.attributes);
+                return other != null && comparer.Equals(retain, other.retain) && Utils.DictionaryEquals(this.attributes, other.attributes);
+            }
+            if (this.IsRetainObject() && other.IsRetainObject())
+            {
+                return Utils.DictionaryEquals((Dictionary<string, object>)retain, (Dictionary<string, object>)other.retain) && Utils.DictionaryEquals(this.attributes, other.attributes);
             }
             if (this.IsDelete() && other.IsDelete())
             {
@@ -86,23 +89,24 @@ namespace DotNetDelta
             return 0;
         }
 
-        private bool embedsAreEqual(Dictionary<string, object>? dict1, Dictionary<string, object>? dict2)
+        private bool EmbedsAreEqual(Dictionary<string, object>? dict1, Dictionary<string, object>? dict2)
         {
                 
-            // Check if both dictionaries are null
-            if (dict1 == null && dict2 == null)
-                return true;
-
-            // Check if either dictionary is null
-            if (dict1 == null || dict2 == null)
-                return false;
-
-            // Check if dictionaries have the same number of entries
-            if (dict1.Count != dict2.Count)
-                return false;
-
-            // Check if all keys from dict1 exist in dict2 with the same corresponding values
-            return dict1.All(kv => dict2.TryGetValue(kv.Key, out object value) && EqualityComparer<object>.Default.Equals(kv.Value, value));
+            // // Check if both dictionaries are null
+            // if (dict1 == null && dict2 == null)
+            //     return true;
+            //
+            // // Check if either dictionary is null
+            // if (dict1 == null || dict2 == null)
+            //     return false;
+            //
+            // // Check if dictionaries have the same number of entries
+            // if (dict1.Count != dict2.Count)
+            //     return false;
+            //
+            // // Check if all keys from dict1 exist in dict2 with the same corresponding values
+            // return dict1.All(kv => dict2.TryGetValue(kv.Key, out object value) && EqualityComparer<object>.Default.Equals(kv.Value, value));
+            return Utils.DictionaryEquals(dict1, dict2);
     
         }
 
@@ -227,6 +231,26 @@ namespace DotNetDelta
                 newOp.attributes = new AttributeMap(op.attributes);
             }
             return newOp;
+        }
+
+        public string GetOpType()
+        {
+            if (IsInsert() || IsInsertEmbed())
+            {
+                return OpType.Insert;
+            }
+
+            if (IsDelete())
+            {
+                return OpType.Delete;
+            }
+
+            if (IsRetain() || IsRetainObject())
+            {
+                return OpType.Retain;
+            }
+
+            return "InvalidOp";
         }
 
 

@@ -20,24 +20,12 @@ namespace DotNetDelta {
 
         public override bool Equals(object? obj)
         {
-            if (obj == null || GetType() != obj.GetType())
-            {
-                return false;
-            }
-                
-            AttributeMap other = (AttributeMap)obj;
-            if (this.Count != other.Count)
-            {
-                return false;
-            }
-            foreach (KeyValuePair<string, object> kvp in this)
-            {
-                if (!other.ContainsKey(kvp.Key) || !comparer.Equals(kvp.Value, other[kvp.Key]))
-                {
-                    return false;
-                }
-            }
-            return true;
+           return Utils.DictionaryEquals(this, obj as AttributeMap);            
+        }
+        
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
 
 
@@ -47,29 +35,16 @@ namespace DotNetDelta {
         /// </summary>
         public static AttributeMap Compose(AttributeMap? a, AttributeMap? b, bool keepNull = false) 
         {
-            if (a == null)
-            {
-                a = new AttributeMap();
-            }
-            if (b == null)
-            {
-                b = new AttributeMap();
-            }
+            a ??= new AttributeMap();
+            b ??= new AttributeMap();
             AttributeMap c = new AttributeMap();
-            foreach (KeyValuePair<string, object> kvp in b) 
+            foreach (var kvp in b.Where(kvp => keepNull || kvp.Value != null))
             {
-                if (keepNull || kvp.Value != null)
-                {
-                    c[kvp.Key] = kvp.Value;
-                }
+                c[kvp.Key] = kvp.Value;
             }
-            foreach (KeyValuePair<string, object> kvp in a) 
+            foreach (var kvp in a.Where(kvp => !b.ContainsKey(kvp.Key)))
             {
-                if (!b.ContainsKey(kvp.Key)) 
-                {
-                    c[kvp.Key] = kvp.Value;
-                }
-                
+                c[kvp.Key] = kvp.Value;
             }
 
             return c;
@@ -81,14 +56,8 @@ namespace DotNetDelta {
         /// </summary>
         public static AttributeMap Diff(AttributeMap? a, AttributeMap? b)
         {
-            if (a == null)
-            {
-                a = new AttributeMap();
-            }
-            if (b == null)
-            {
-                b = new AttributeMap();
-            }
+            a ??= new AttributeMap();
+            b ??= new AttributeMap();
             AttributeMap diff = new AttributeMap();
             // Get the list of keys in a and b and put them into an array or list
             // Then iterate through the list and compare the values
@@ -127,20 +96,14 @@ namespace DotNetDelta {
         /// Returns another AttributeMap that would "undo" the changes that the composition of "attributes" and "base" would make to "base".
         /// That is: invert(compose(base, attributes), attributes) == base
         /// </summary>
-        public static AttributeMap Invert(AttributeMap? modifingAttributes, AttributeMap baseAttributes)
+        public static AttributeMap Invert(AttributeMap? modifyingAttributes, AttributeMap baseAttributes)
         {
-            if (modifingAttributes == null)
-            {
-                modifingAttributes = new AttributeMap();
-            }
-            if (baseAttributes == null)
-            {
-                baseAttributes = new AttributeMap();
-            }
+            modifyingAttributes ??= new AttributeMap();
+            baseAttributes ??= new AttributeMap();
             AttributeMap inversion = new AttributeMap();
         
             
-            IEnumerable<string> allKeys = modifingAttributes.Keys.Union(baseAttributes.Keys);
+            IEnumerable<string> allKeys = modifyingAttributes.Keys.Union(baseAttributes.Keys);
 
             // If key is defined in both maps, take the value in base if they're different; otherwise, don't add anything
             // If key is defined in modifingAttributes, but not in base, use null
@@ -148,14 +111,14 @@ namespace DotNetDelta {
             // If key is defined in neither, don't add anything
             foreach (string key in allKeys)
             {
-                if (modifingAttributes.ContainsKey(key) && baseAttributes.ContainsKey(key))
+                if (modifyingAttributes.ContainsKey(key) && baseAttributes.ContainsKey(key))
                 {
-                    if (!comparer.Equals(modifingAttributes[key], baseAttributes[key]))
+                    if (!comparer.Equals(modifyingAttributes[key], baseAttributes[key]))
                     {
                         inversion[key] = baseAttributes[key];
                     }
                 }
-                else if (modifingAttributes.ContainsKey(key) && !baseAttributes.ContainsKey(key))
+                else if (modifyingAttributes.ContainsKey(key) && !baseAttributes.ContainsKey(key))
                 {
                     inversion[key] = null;
                 }
@@ -172,7 +135,7 @@ namespace DotNetDelta {
         {
             if (left == null)
             {
-                return right == null ? new AttributeMap() : right;
+                return right ?? new AttributeMap();
             }
             if (right == null)
             {
@@ -193,10 +156,9 @@ namespace DotNetDelta {
             //         transformation[key] = right[key];
             //     }
             // }
-            foreach (KeyValuePair<string, object> kvp in right) {
-                if (!left.ContainsKey(kvp.Key)) {
-                    transformation[kvp.Key] = kvp.Value;
-                }
+            foreach (var kvp in right.Where(kvp => !left.ContainsKey(kvp.Key)))
+            {
+                transformation[kvp.Key] = kvp.Value;
             }
             return transformation;
         }

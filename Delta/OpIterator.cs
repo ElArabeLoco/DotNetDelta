@@ -105,7 +105,7 @@ namespace DotNetDelta
 
         public string PeekType()
         {
-            Op? op = ops.Count > 0 ? ops[_index] : null;
+            Op? op = ops.Count == 0 || _index >= ops.Count ? null : ops[_index];
             if (op == null)
             {
                 return OpType.Retain;
