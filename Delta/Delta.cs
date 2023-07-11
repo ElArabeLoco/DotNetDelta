@@ -1,6 +1,0 @@
-namespace DotNetDelta {
-
-    class Delta {
-        
-    }
-}
