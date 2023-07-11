@@ -146,7 +146,7 @@ public class DeltaHelpersTests
     [Category("Iterators")]
     public void Filter()
     {
-        List<Op> ops = _delta.Filter((Op op, int i) => op.insert is string);
+        List<Op> ops = _delta.Filter((op, i) => op.insert is string);
         Assert.That(ops, Has.Count.EqualTo(2)); // Filters out second op
     }
 
