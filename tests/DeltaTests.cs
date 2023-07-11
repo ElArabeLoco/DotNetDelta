@@ -241,6 +241,7 @@ public class DeltaHelpersTests
             .Insert("3", new AttributeMap() { { "bold", true } })
             .Insert("4");
         Assert.That(slicedDelta, Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -254,6 +255,7 @@ public class DeltaHelpersTests
             .Slice(2, 3);
         var expected = new Delta().Insert("A", new AttributeMap() { { "bold", true } });
         Assert.That(slicedDelta, Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
 
@@ -266,6 +268,7 @@ public class DeltaHelpersTests
             .Insert("A", new AttributeMap() { { "bold", true } })
             .Insert("B");
         Assert.That(delta.Slice(), Is.EqualTo(delta));
+        Console.WriteLine("Exp: " + delta.ToJson(true));
     }
 
     [Test]
@@ -279,6 +282,7 @@ public class DeltaHelpersTests
         var expected = new Delta()
             .Insert("B", new AttributeMap() { { "bold", true } });
         Assert.That(slicedDelta, Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -292,6 +296,7 @@ public class DeltaHelpersTests
         var expected = new Delta()
             .Insert("B", new AttributeMap() { { "bold", true } });
         Assert.That(slicedDelta, Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 }
 
@@ -306,6 +311,7 @@ public class DeltaComposeTests
         var b = new Delta().Insert("B");
         var expected = new Delta().Insert("B").Insert("A");
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -316,6 +322,7 @@ public class DeltaComposeTests
         var b = new Delta().Retain(1, new AttributeMap { { "bold", true }, { "color", "red" }, { "font", null } });
         var expected = new Delta().Insert("A", new AttributeMap { { "bold", true }, { "color", "red" } });
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -326,6 +333,7 @@ public class DeltaComposeTests
         var b = new Delta().Delete(1);
         var expected = new Delta();
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -336,6 +344,7 @@ public class DeltaComposeTests
         var b = new Delta().Insert("B");
         var expected = new Delta().Insert("B").Delete(1);
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -348,6 +357,7 @@ public class DeltaComposeTests
             .Delete(1)
             .Retain(1, new AttributeMap { { "bold", true }, { "color", "red" } });
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -358,6 +368,8 @@ public class DeltaComposeTests
         var b = new Delta().Delete(1);
         var expected = new Delta().Delete(2);
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -368,6 +380,7 @@ public class DeltaComposeTests
         var b = new Delta().Insert("B");
         var expected = new Delta().Insert("B").Retain(1, new AttributeMap { { "color", "blue" } });
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -399,6 +412,7 @@ public class DeltaComposeTests
         var b = new Delta().Retain(3).Insert("X");
         var expected = new Delta().Insert("HelXlo");
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -429,6 +443,7 @@ public class DeltaComposeTests
             new Dictionary<string, object> { { "embed", 1 } },
             new AttributeMap { { "image", "http://quilljs.com" }, { "alt", "logo" } });
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -443,6 +458,7 @@ public class DeltaComposeTests
             new Dictionary<string, object> { { "figure", true } },
             new AttributeMap { { "alt", "logo" }, { "src", "http://quilljs.com/image.png" } });
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -453,6 +469,7 @@ public class DeltaComposeTests
         var b = new Delta().Delete(9);
         var expected = new Delta().Delete(4);
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -463,6 +480,7 @@ public class DeltaComposeTests
         var b = new Delta().Retain(10);
         var expected = new Delta().Insert("Hello");
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -473,6 +491,7 @@ public class DeltaComposeTests
         var b = new Delta().Retain(1);
         var expected = new Delta().Insert(new Dictionary<string, object> { { "embed", 1 } });
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -483,6 +502,7 @@ public class DeltaComposeTests
         var b = new Delta().Retain(1, new AttributeMap { { "bold", null } });
         var expected = new Delta().Insert("A");
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -494,6 +514,7 @@ public class DeltaComposeTests
         var b = new Delta().Retain(1, new AttributeMap { { "bold", null } });
         var expected = new Delta().Insert(new Dictionary<string, object> { { "embed", 2 } });
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -535,6 +556,7 @@ public class DeltaComposeTests
             .Insert("D")
             .Delete(1);
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -557,6 +579,7 @@ public class DeltaComposeTests
             .Retain(4)
             .Delete(1);
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     public void Compose_RetainEndOptimization()
@@ -570,6 +593,7 @@ public class DeltaComposeTests
             .Insert("B")
             .Insert("C", new AttributeMap { { "bold", true } });
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 
     [Test]
@@ -590,6 +614,7 @@ public class DeltaComposeTests
             .Insert("E", new AttributeMap { { "bold", true } })
             .Insert("F");
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
 }
 
@@ -597,28 +622,12 @@ public class DeltaComposeTests
 [Category("Compose")]
 public class DeltaComposeWithEmbedsTests
 {
-    public class CustomEmbedHandler : IEmbedHandler<AttributeMap>
-    {
-        public AttributeMap Compose(AttributeMap a, AttributeMap b, bool keepNull)
-        {
-            return AttributeMap.Compose(a, b, keepNull);
-        }
-
-        public AttributeMap Invert(AttributeMap a, AttributeMap b)
-        {
-            return AttributeMap.Invert(a, b);
-        }
-
-        public AttributeMap Transform(AttributeMap a, AttributeMap b, bool priority)
-        {
-            return AttributeMap.Transform(a, b, priority);
-        }
-    }
 
     [SetUp]
     public void Setup()
     {
-        Delta.RegisterEmbed("embed", new CustomEmbedHandler());
+        // Delta.RegisterEmbed("embed", new CustomEmbedHandler());
+        Delta.RegisterEmbed(new DefaultEmbedHandler("embed"));
     }
 
     [TearDown]
@@ -638,6 +647,7 @@ public class DeltaComposeWithEmbedsTests
             .Insert(new AttributeMap { { "embed", new AttributeMap { { "attr", "a" } } } },
                 new AttributeMap { { "bold", true } });
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
     
     [Test]
@@ -653,6 +663,8 @@ public class DeltaComposeWithEmbedsTests
             .Retain(9, new AttributeMap { { "bold", true } });
         
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
+        
     }
     
     [Test]
@@ -666,6 +678,97 @@ public class DeltaComposeWithEmbedsTests
             .Insert(new AttributeMap { { "embed", new AttributeMap { { "attr1", 1 }, { "attr2", 2 } } } });
         
         Assert.That(a.Compose(b), Is.EqualTo(expected));
+        Console.WriteLine("Exp: " + expected.ToJson(true));
     }
-        
+
 }
+
+[TestFixture]
+[Category("JSON")]
+
+public class DeltaJSONSerializationDeserialization
+{
+    [Test]
+    public void ToJson_WithInsertsWithAttributes_Deletes_Retains()
+    {
+        var delta = new Delta()
+            .Insert("Hello", new AttributeMap { { "bold", true } })
+            .Insert("World")
+            .Delete(3)
+            .Retain(4, new AttributeMap { { "color", "#fff" } });
+        var expected = @"{""ops"":[{""insert"":""Hello"",""attributes"":{""bold"":true}},{""insert"":""World""},{""delete"":3},{""retain"":4,""attributes"":{""color"":""#fff""}}]}";
+        Console.WriteLine("Exp: " + expected);
+        Console.WriteLine("Act: " + delta.ToJson());
+        Assert.That(delta.ToJson(), Is.EqualTo(expected));
+    } 
+    
+    [Test]
+    public void ToJson_NullAttributeValuesAreNotIgnored()
+    {
+        var delta = new Delta()
+            .Insert("Hello", new AttributeMap { { "bold", null } })
+            .Insert("World")
+            .Delete(3)
+            .Retain(4, new AttributeMap { { "color", "#fff" } });
+        var expected = @"{""ops"":[{""insert"":""Hello"",""attributes"":{""bold"":null}},{""insert"":""World""},{""delete"":3},{""retain"":4,""attributes"":{""color"":""#fff""}}]}";
+        Console.WriteLine("Exp: " + expected);
+        Console.WriteLine("Act: " + delta.ToJson());
+        Assert.That(delta.ToJson(), Is.EqualTo(expected));
+    } 
+    
+    
+    [Test]
+    public void FromJson_Basic()
+    {
+        const string delta = @"
+{
+    ""ops"": [
+        {
+            ""insert"": ""Testing how this ""
+        },
+        {
+            ""attributes"": {
+                ""bold"": true
+            },
+            ""insert"": ""delta""
+        },
+        {
+            ""insert"": ""\ngets ""
+        },
+        {
+            ""attributes"": {
+                ""size"": ""42px"",
+                ""underline"": true,
+                ""italic"": true
+            },
+            ""insert"": ""parsed""
+        },
+        {
+            ""insert"": ""\ninto ""
+        },
+        {
+            ""insert"": ""JSON"",
+            ""attributes"": {
+                ""size"": ""98px"",
+                ""font"": ""verdana""
+            }
+        },
+        {
+            ""insert"": ""\n""
+        }
+    ]
+}";
+        
+        var expected = new Delta()
+            .Insert("Testing how this ")
+            .Insert("delta", new AttributeMap { { "bold", true } })
+            .Insert("\ngets ")
+            .Insert("parsed", new AttributeMap { { "size", "42px" }, { "underline", true }, { "italic", true } })
+            .Insert("\ninto ")
+            .Insert("JSON", new AttributeMap { { "size", "98px" }, { "font", "verdana" } })
+            .Insert("\n");
+
+        Assert.That(Delta.FromJson(delta), Is.EqualTo(expected));
+    } 
+}
+

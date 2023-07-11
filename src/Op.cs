@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using DotNetDelta.Util;
 namespace DotNetDelta
 {
 
@@ -9,9 +10,12 @@ namespace DotNetDelta
         private static readonly IEqualityComparer<Dictionary<string, object>> dictComparer = EqualityComparer<Dictionary<string, object>>.Default;
         
         // Only one property out of {insert, delete, retain} will be present
+        [JsonConverter(typeof(StringOrEmbedJsonConverter))]
         public object? insert { get; set; }
         public int? delete { get; set; }
         public object? retain { get; set; }
+        
+        [JsonConverter(typeof(AttributeMapJsonConverter))]
         public AttributeMap? attributes { get; set; }
 
 

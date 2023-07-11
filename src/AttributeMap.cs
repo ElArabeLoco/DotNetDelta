@@ -1,3 +1,4 @@
+using DotNetDelta.Util;
 namespace DotNetDelta {
 
     /// <summary>

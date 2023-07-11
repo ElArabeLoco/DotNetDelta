@@ -1,4 +1,4 @@
-namespace DotNetDelta;
+namespace DotNetDelta.Util;
 
 public class Utils
 {

@@ -3,3 +3,10 @@ Delta/bin
 Delta/obj
 Delta.Tests/bin
 Delta.Tests/obj
+dist
+src/bin
+src/obj
+tests/bin
+tests/obj
+.idea
+
